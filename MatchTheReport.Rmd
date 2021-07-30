@@ -1,0 +1,188 @@
+---
+title: "get to the bottom of the data issue"
+output: html_document
+---
+
+# Issue
+
+Reported drainage does not match FIF data package 
+
+Some notes: 
+
+1. P data is genereted by R and directly used by the report   
+2. N and D data were compiled in excel files and used for report.  
+3. N and D data were also processed in R to generate the FIF data package. 
+
+Assumptions of the issue: 
+1. Excel files have pivot table data compiled by hand and clear thinking 
+2. R process might stuff up the filtering process. 
+
+Action:
+
+1. read the data from pivot table in the swb 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(data.table)
+library(magrittr)
+# CONSTANT
+sheetname = "Yearly Summary"
+l <- vector("list", length = 9)
+names(l) <- paste0("site", c(3, 5:12))
+```
+
+```{r}
+region <- "Cant"
+checknames <- grep(region, readRDS("SWBfilenames.rds"),
+                   value = TRUE)
+```
+
+```{r}
+DT <- read_excel(checknames[3], sheet =  "DFM data pivot", skip = 18, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+              by = .(YEAR)]
+
+
+l$site3 <- sum
+```
+
+```{r}
+region <- "Manawatu"
+checknames <- grep(region, readRDS("SWBfilenames.rds"),
+                   value = TRUE)
+```
+
+```{r}
+DT <- read_excel(checknames[1], sheet =  "DFM data pivot", skip = 18, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+              by = .(YEAR)]
+
+l$site5 <- sum
+DT <- read_excel(checknames[2], sheet =  "DFM data pivot", skip = 18, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+              by = .(YEAR)]
+
+
+l$site6 <- sum
+```
+
+```{r}
+region <- "Northern"
+checknames <- grep(region, readRDS("SWBfilenames.rds"),
+                   value = TRUE)
+```
+
+```{r}
+DT <- read_excel(checknames[1],  sheet =  "DFM data pivot", skip = 18, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+              by = .(YEAR)]
+
+l$site10 <- sum
+
+## Site 11 PROBLEM------
+DT <- read_excel(checknames[2], sheet =  "DFM data pivot", skip = 18, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm., 
+                             Drainage.data.INPUT._.mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE),
+                  Drainage.data.INPUT._.mm. = sum(Drainage.data.INPUT._.mm., 
+                                                  na.rm = TRUE)),
+              by = .(YEAR)]
+
+l$site11 <- sum
+
+# Site 12 
+# Year 4 is ok to leave it 
+# Year 6 used modelled data 
+DT <- read_excel(checknames[3], sheet = "DFM data pivot", skip = 18,
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm., 
+                             Drainage.INPUT..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE),
+                  Drainage.data.INPUT._.mm. = sum(Drainage.INPUT..mm., 
+                                                  na.rm = TRUE)),
+              by = .(YEAR)]
+
+l$site12<- sum
+```
+
+
+# HB
+
+```{r}
+region <- "HB"
+checknames <- grep(region, readRDS("SWBfilenames.rds"),
+                   value = TRUE)
+```
+
+```{r}
+swb_l <- lapply(checknames[1:2], function(x){
+  swb <- read_excel(x,
+                    sheet =  "DFM data pivot", skip = 18,
+                    .name_repair = "universal") %>% 
+    as.data.table()
+  DT_sub <- swb[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+  sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                    Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+                by = .(YEAR)]
+
+  })
+swb_sub <- rbindlist(swb_l)[order(YEAR)]
+
+
+l$site7 <- swb_sub
+
+swb_l <- lapply(checknames[3:4], function(x){
+  swb <- read_excel(x,
+                    sheet =  "DFM data pivot", skip = 18,
+                    .name_repair = "universal") %>% 
+    as.data.table()
+  DT_sub <- swb[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+  sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                    Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+                by = .(YEAR)]
+
+  })
+swb_sub <- rbindlist(swb_l)[order(YEAR)]
+
+
+l$site8 <- swb_sub
+
+DT <- read_excel(checknames[5], sheet =  "DFM data pivot", skip = 16, 
+                 .name_repair = "universal") %>% 
+  as.data.table()
+DT_sub <- DT[!is.na(YEAR), .(YEAR, Drainage.model..mm.,Drainage.data..mm.)]
+sum <- DT_sub[, .(Drainage.model..mm. = sum(Drainage.model..mm., na.rm = TRUE),
+                  Drainage.data..mm. = sum(Drainage.data..mm., na.rm = TRUE)),
+              by = .(YEAR)]
+
+
+l$site9 <- sum
+```
+
+```{r}
+output <- rbindlist(l, fill = TRUE, use.names = TRUE, idcol = "Site")
+
+fwrite(x = output, file = "output.csv")
+```

@@ -1,0 +1,494 @@
+---
+title: "FIF Data Packages"
+author: "Matt Norris"
+date: "10 August 2018"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+source("packages.R")
+source("functions.R")
+```
+
+
+### Phosphorus Data ---> This is from the P Data Analysis Code (\\Hawdfs41\data\Common\EXPTS\Commercial\F A R\SFF Fluxmeter\Sites and Results\Fluxmeter R\Phosphorus data analysis) NB: P DATE NEEDS TO BE UPDATED/REVIEWED BEFORE BEING INCLUDED IN FINAL FIF PACKAGE
+```{r, echo=FALSE}
+
+P_Data <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/R Files/FIF_P_DATA.xlsx", skip = 0,col_names = T)  %>%   select("Date", "Site", "Count [P]" = "n_DRP", "DRP (mg/L)" = "DRP_Conc","DRP SD (mg/L)" = "SD_DRP_Conc", "Total-P (mg/L)" = "TotP_Conc", "Total-P SD (mg/L)" = "SD_TotP_Conc", "DRP (kg/ha)"="DRP_Flux", "DRP SD (kg/ha)" = "DRP_SD",  "Total-P (kg/ha)" = "TotP_Flux", "Total-P SD (kg/ha)" = "TotP_SD") %>% 
+                        mutate(Date = as.Date(Date)) %>% 
+                        mutate(`DRP SD (mg/L)` = ifelse(`Count [P]` == 1, NA,`DRP SD (mg/L)`)) %>% 
+                        mutate(`Total-P SD (mg/L)` = ifelse(`Count [P]` == 1, NA,`Total-P SD (mg/L)`)) %>% 
+                        mutate(`DRP (kg/ha)` = ifelse(`Count [P]` == 1, NA,`DRP (kg/ha)`)) %>% 
+                        mutate(`Total-P SD (kg/ha)` = ifelse(`Count [P]` == 1, NA,`Total-P SD (kg/ha)`))
+```
+
+
+### Site 1 Files (No 1.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S1.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 1 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S1.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 1 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S1.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 1 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S1.4.1 <- P_Data %>% filter(Site == 1) %>%  select(-c("Site"))
+
+S1.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 1 (Mackenzie)/Results/Cant 1 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S1.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 1 (Mackenzie)/Results/Cant 1 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site1.1 <-   Sum_x.1(S1.1)
+Site1.3 <-   Sum_x.3(S1.3)
+Site1.4.1 <- Sum_x.4_Gen(S1.4)
+Site1.4.2 <- Sum_x.4.1(Site1.4.1)
+Site1.4.3 <- Sum_x.4.2(Site1.4.1)
+Site1.4.4 <- Sum_x.4.3(Site1.4.1)
+Site1.4.5 <- merge(Site1.4.4,S1.4.1, by = c("Date"), all = TRUE)
+Site1.5.1 <- Sum_x.5(S1.5)
+Site1.6 <- Sum_x.6(S1.6)
+
+S1 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site1.1,Site1.3,Site1.4.2, Site1.4.3, Site1.4.5, Site1.5.1, Site1.6))
+
+write_xlsx(S1, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Canterbury Site 1.xlsx")
+  
+```
+
+
+### Site 2 Files (No x.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S2.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 2 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S2.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 2 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S2.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 2 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S2.4.1 <- P_Data %>% filter(Site == 2) %>%  select(-c("Site"))
+
+S2.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 2 (Clemens)/Results/Cant 2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S2.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 2 (Clemens)/Results/Cant 2 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site2.1 <-   Sum_x.1(S2.1)
+Site2.3 <-   Sum_x.3(S2.3)
+Site2.4.1 <- Sum_x.4_Gen(S2.4)
+Site2.4.2 <- Sum_x.4.1(Site2.4.1)
+Site2.4.3 <- Sum_x.4.2(Site2.4.1)
+Site2.4.4 <- Sum_x.4.3(Site2.4.1)
+Site2.4.5 <- merge(Site2.4.4,S2.4.1, by = c("Date"), all = TRUE)
+Site2.5.1 <- Sum_x.5(S2.5)
+Site2.6 <- Sum_x.6(S2.6)
+
+S2 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site2.1,Site2.3,Site2.4.2, Site2.4.3, Site2.4.5, Site2.5.1, Site2.6))
+
+write_xlsx(S2, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Canterbury Site 2.xlsx")
+  
+```
+
+
+### Site 3 Files (includes measured soil moisture data)
+```{r, echo=FALSE} 
+S3.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 3 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S3.2 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 3 (McEvedy)/Results/Met station/Cant 3 Met Station.xlsx",sheet = "Raw Data 2", skip = 0,col_names = T)
+
+S3.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 3 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S3.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 3 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+# S3.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Soil Water Balance Files/Cant Site 3 SWB (V1).xlsx", sheet =  "DFM data pivot", skip = 18) 
+
+S3.4.1 <- P_Data %>% filter(Site == 3) %>%  select(-c("Site"))
+
+S3.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 3 (McEvedy)/Results/Cant 3 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S3.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Canterbury/Cant Site 3 (McEvedy)/Results/Cant 3 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site3.1 <-   Sum_x.1(S3.1)
+Site3.2 <-   Sum_x.2(S3.2)
+Site3.3 <-   Sum_x.3(S3.3)
+Site3.4.1 <- Sum_x.4_Gen(S3.4)
+Site3.4.2 <- Sum_x.4.1(Site3.4.1)
+Site3.4.3 <- Sum_x.4.2(Site3.4.1)
+Site3.4.4 <- Sum_x.4.3(Site3.4.1)
+Site3.4.5 <- merge(Site3.4.4,S3.4.1, by = c("Date"), all = TRUE)
+Site3.5.1 <- Sum_x.5(S3.5)
+Site3.6 <- Sum_x.6(S3.6)
+
+S3 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site3.1,Site3.2, Site3.3,Site3.4.2, Site3.4.3, Site3.4.5, Site3.5.1, Site3.6))
+## Check 
+D <- group_in_season(setDT(Site3.4.2),date_col = "Date")
+
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+
+write_xlsx(S3, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Canterbury Site 3.xlsx")
+  
+```
+
+### Site 4 Files (includes measured soil moisture data - currently being recorded)
+```{r, echo=FALSE} 
+S4.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 4 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S4.2 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 1 (Clarke)/Diary and Results/TDR Data/TDR Data Levin.xlsx",sheet = "Raw Data", skip = 0,col_names = T)
+
+S4.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 4 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:58)) 
+
+S4.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 4 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S4.4.1 <- P_Data %>% filter(Site == 4) %>%  select(-c("Site"))
+
+S4.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 1 (Clarke)/Diary and Results/Manawatu Site 1 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S4.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 1 (Clarke)/Diary and Results/Manawatu Site 1 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site4.1 <-   Sum_x.1(S4.1)
+Site4.2 <-   S4.2 %>% 
+  select(Date, `Average 0-30 (mm)`, `Average 30-60 (mm)`, `Average 60-90 (mm)`, 
+         `10 cm Soil Temp (C )...18`) %>% 
+  ddply(c("`Date`"), summarise,
+        "SWC 0-30 cm (mm)" = mean(`Average 0-30 (mm)`),
+        "SWC 30-60 cm (mm)" = mean(`Average 30-60 (mm)`),
+        "SWC 60-90 cm (mm)" = mean(`Average 60-90 (mm)`),
+        "10 cm soil temp (C)" = mean(`10 cm Soil Temp (C )...18`))
+Site4.3 <-   Sum_x.3(S4.3)
+Site4.4.1 <- Sum_x.4_Gen(S4.4)
+Site4.4.2 <- Sum_x.4.1(Site4.4.1)
+Site4.4.3 <- Sum_x.4.2(Site4.4.1)
+Site4.4.4 <- Sum_x.4.3(Site4.4.1)
+Site4.4.5 <- merge(Site4.4.4,S4.4.1, by = c("Date"), all = TRUE)
+Site4.5.1 <- Sum_x.5(S4.5)
+Site4.6 <- Sum_x.6(S4.6)
+
+S4 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site4.1,Site4.2, Site4.3,Site4.4.2, Site4.4.3, Site4.4.5, Site4.5.1, Site4.6))
+
+write_xlsx(S4, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Manawatu Site 4.xlsx")
+  
+```
+
+### Site 5 Files (No x.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S5.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 5 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S5.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 5 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S5.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 5 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S5.4.1 <- P_Data %>% filter(Site == 5) %>%  select(-c("Site"))
+
+S5.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 2 (Dalrymple)/Diary and Results/Manawatu Site 2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S5.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 2 (Dalrymple)/Diary and Results/Manawatu Site 2 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site5.1 <-   Sum_x.1(S5.1)
+Site5.3 <-   Sum_x.3(S5.3)
+Site5.4.1 <- Sum_x.4_Gen(S5.4)
+Site5.4.2 <- Sum_x.4.1(Site5.4.1)
+Site5.4.3 <- Sum_x.4.2(Site5.4.1)
+Site5.4.4 <- Sum_x.4.3(Site5.4.1)
+Site5.4.5 <- merge(Site5.4.4,S5.4.1, by = c("Date"), all = TRUE)
+Site5.5.1 <- Sum_x.5(S5.5)
+Site5.6 <- Sum_x.6(S5.6)
+
+S5 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site5.1,Site5.3,Site5.4.2, Site5.4.3, Site5.4.5, Site5.5.1, Site5.6))
+D <- group_in_season(setDT(Site5.4.2),date_col = "Date")
+
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+write_xlsx(S5, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Manawatu Site 5.xlsx")
+  
+```
+
+
+### Site 6 Files (includes measured some soil moisture data - not currently being recorded)
+```{r, echo=FALSE} 
+S6.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 6 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S6.2 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 3 (Wilcox)/Diary and Results/Ohakune SWC data.xlsx",sheet = "logger data", skip = 18,col_names = T)
+
+S6.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 6 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S6.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Soil Water Balance Files/Manawatu Site 6 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S6.4.1 <- P_Data %>% filter(Site == 6) %>%  select(-c("Site"))
+
+S6.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 3 (Wilcox)/Diary and Results/Manawatu Site 3 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S6.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Manawatu/Manawatu Site 3 (Wilcox)/Diary and Results/Manawatu Site 3 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site6.1 <-   Sum_x.1(S6.1)
+Site6.2 <-   Sum_x.2(S6.2)
+Site6.3 <-   Sum_x.3(S6.3)
+Site6.4.1 <- Sum_x.4_Gen(S6.4)
+Site6.4.2 <- Sum_x.4.1(Site6.4.1)
+Site6.4.3 <- Sum_x.4.2(Site6.4.1)
+Site6.4.4 <- Sum_x.4.3(Site6.4.1)
+Site6.4.5 <- merge(Site6.4.4,S6.4.1, by = c("Date"), all = TRUE)
+Site6.5.1 <- Sum_x.5(S6.5)
+Site6.6 <- Sum_x.6(S6.6)
+
+S6 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site6.1,Site6.2, Site6.3,Site6.4.2, Site6.4.3, Site6.4.5, Site6.5.1, Site6.6))
+# Checking
+D <- group_in_season(setDT(Site6.4.2),date_col = "Date")
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+write_xlsx(S6, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Manawatu Site 6.xlsx")
+  
+```
+
+### Site 7 OLD Files (No x.2 as no logging gear at this site)
+### Flooded Outliers denoted by xxx in Raw Data
+```{r, echo=FALSE} 
+S7.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (OLD) SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S7.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (OLD) SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S7.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (OLD) SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S7.4.1 <- P_Data %>% filter(Site == 7) %>%  select(-c("Site"))
+
+S7.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 1 (Hugh Richie)/Diary and Results/HB Site 1 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S7.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 1 (Hugh Richie)/Diary and Results/HB Site 1 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site7.1 <-   Sum_x.1(S7.1)
+Site7.3 <-   Sum_x.3(S7.3)
+Site7.4.1 <- Sum_x.4_Gen(S7.4)
+Site7.4.2 <- Sum_x.4.1(Site7.4.1)
+Site7.4.3 <- Sum_x.4.2(Site7.4.1)
+Site7.4.4 <- Sum_x.4.3(Site7.4.1)
+Site7.4.5 <- merge(Site7.4.4,S7.4.1, by = c("Date"), all = TRUE)
+Site7.5.1 <- Sum_x.5(S7.5)
+Site7.6 <- Sum_x.6(S7.6)
+
+S7 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site7.1, Site7.3,Site7.4.2, Site7.4.3, Site7.4.5, Site7.5.1, Site7.6))
+
+write_xlsx(S7, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Hawke's Bay Site 7.xlsx")
+  
+```
+
+### Site 7 NEW Files (No x.2 as no logging gear at this site)
+### Flooded Outliers denoted by xxx in Raw Data
+```{r, echo=FALSE} 
+S7.1_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (NEW) SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S7.3_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (NEW) SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S7.4_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 7 (NEW) SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S7.4.1_NEW <- P_Data %>% filter(Site == 7.2) %>%  select(-c("Site"))
+
+S7.5_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 1.2 (Hugh Richie - NEW)/Diary and Results/HB Site 1.2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S7.6_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 1.2 (Hugh Richie - NEW)/Diary and Results/HB Site 1.2 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site7.1_NEW <-   Sum_x.1(S7.1_NEW)
+Site7.3_NEW <-   Sum_x.3(S7.3_NEW)
+Site7.4.1_NEW <- Sum_x.4_Gen(S7.4_NEW)
+Site7.4.2_NEW <- Sum_x.4.1(Site7.4.1_NEW)
+Site7.4.3_NEW <- Sum_x.4.2(Site7.4.1_NEW)
+Site7.4.4_NEW <- Sum_x.4.3(Site7.4.1_NEW)
+Site7.4.5_NEW <- merge(Site7.4.4_NEW,S7.4.1_NEW, by = c("Date"), all = TRUE)
+Site7.5.1_NEW <- Sum_x.5(S7.5_NEW)
+Site7.6_NEW <- Sum_x.6(S7.6_NEW)
+
+S7_NEW <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site7.1_NEW, Site7.3_NEW,Site7.4.2_NEW, Site7.4.3_NEW, Site7.4.5_NEW, Site7.5.1_NEW, Site7.6_NEW))
+
+write_xlsx(S7_NEW, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Hawke's Bay Site 7_NEW.xlsx")
+  
+```
+
+
+### Site 8 OLD (includes measured soil moisture data BUT EXCLUDES ALL DRAINAGE DATA)
+```{r, echo=FALSE} 
+S8.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (OLD) SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S8.2 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2 (Mark Apatu)/Diary and Results/TDR/TDR Data Apatu (Hawke's Bay 2).xlsx",sheet = "Data 2", skip = 0,col_names = T)
+
+S8.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (OLD) SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:61)) 
+
+S8.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (OLD) SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+
+S8.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2 (Mark Apatu)/Diary and Results/HB Site 2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S8.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2 (Mark Apatu)/Diary and Results/HB Site 2 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site8.1 <-   Sum_x.1(S8.1)
+Site8.2 <-   Sum_x.2(S8.2)
+Site8.3 <-   Sum_x.3(S8.3)
+Site8.5.1 <- Sum_x.5(S8.5)
+Site8.6 <- Sum_x.6(S8.6)
+
+S8_OLD <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site8.1, Site8.2, Site8.3,Site8.5.1, Site8.6))
+
+write_xlsx(S8_OLD, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Hawke's Bay Site 8.xlsx")
+```
+
+
+### Site 8 NEW (includes measured soil moisture data)
+```{r, echo=FALSE} 
+S8.1_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (NEW) SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S8.2_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2.2 (Mark Apatu - NEW)/Diary & Results/TDR/TDR Data Apatu (Hawke's Bay 2).xlsx",sheet = "Data 2", skip = 0,col_names = T)
+
+S8.3_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (NEW) SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:62)) 
+
+S8.4_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 8 (NEW) SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S8.4.1_NEW <- P_Data %>% filter(Site == 8.2) %>%  select(-c("Site"))
+
+S8.5_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2.2 (Mark Apatu - NEW)/Diary & Results/HB Site 2.2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S8.6_NEW <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 2.2 (Mark Apatu - NEW)/Diary & Results/HB Site 2.2 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site8.1_NEW <-   Sum_x.1(S8.1_NEW)
+Site8.2_NEW <-   Sum_x.2(S8.2_NEW)
+Site8.3_NEW <-   Sum_x.3(S8.3_NEW)
+Site8.4.1_NEW <- Sum_x.4_Gen(S8.4_NEW)
+Site8.4.2_NEW <- Sum_x.4.1(Site8.4.1_NEW)
+Site8.4.3_NEW <- Sum_x.4.2(Site8.4.1_NEW)
+Site8.4.4_NEW <- Sum_x.4.3(Site8.4.1_NEW)
+Site8.4.5_NEW <- merge(Site8.4.4_NEW,S8.4.1_NEW, by = c("Date"), all = TRUE)
+Site8.5.1_NEW <- Sum_x.5(S8.5_NEW)
+Site8.6_NEW <- Sum_x.6(S8.6_NEW)
+
+S8_NEW <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site8.1_NEW,Site8.2_NEW, Site8.3_NEW,Site8.4.2_NEW, Site8.4.3_NEW, Site8.4.5_NEW, Site8.5.1_NEW, Site8.6_NEW))
+
+write_xlsx(S8_NEW, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Hawke's Bay Site 8_NEW.xlsx")
+```
+
+
+
+
+### Site 9 Files (No x.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S9.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 9 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S9.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 9 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S9.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/Soil Water Balance Files/HB Site 9 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S9.4.1 <- P_Data %>% filter(Site == 9) %>%  select(-c("Site"))
+
+S9.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 3 (Richard Dakins)/Diary and Results/HB Site 3 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S9.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Hawkes Bay/HB Site 3 (Richard Dakins)/Diary and Results/HB Site 3 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site9.1 <-   Sum_x.1(S9.1)
+Site9.3 <-   Sum_x.3(S9.3)
+Site9.4.1 <- Sum_x.4_S9(S9.4)
+Site9.4.2 <- Sum_x.4.1(Site9.4.1)
+Site9.4.3 <- Sum_x.4.2(Site9.4.1)
+Site9.4.4 <- Sum_x.4.3(Site9.4.1)
+Site9.4.5 <- merge(Site9.4.4,S9.4.1, by = c("Date"), all = TRUE)
+Site9.6 <- Sum_x.6(S9.6)
+
+S9 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site9.1, Site9.3,Site9.4.2, Site9.4.3, Site9.4.5, Site9.6))
+
+write_xlsx(S9, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Hawke's Bay Site 9.xlsx")
+  
+```
+
+
+### Site 10 Files (includes measured soil moisture data)
+```{r, echo=FALSE} 
+S10.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 10 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S10.2 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 1 (Balle)/TDR/TDR Data - Balle (Northern 1).xlsx",sheet = "Raw Data", skip = 0,col_names = T)
+
+S10.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 10 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:63)) 
+
+S10.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 10 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S10.4.1 <- P_Data %>% filter(Site == 10) %>%  select(-c("Site"))
+
+S10.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 1 (Balle)/Diary and Results/Northern Site 1 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S10.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 1 (Balle)/Diary and Results/Northern Site 1 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+
+Site10.1 <-   Sum_x.1(S10.1)
+Site10.2 <-   Sum_x.2(S10.2)
+Site10.3 <-   Sum_x.3(S10.3)
+Site10.4.1 <- Sum_x.4_S10(S10.4)
+Site10.4.2 <- Sum_x.4.1(Site10.4.1)
+Site10.4.3 <- Sum_x.4.2(Site10.4.1)
+Site10.4.4 <- Sum_x.4.3(Site10.4.1)
+Site10.4.5 <- merge(Site10.4.4,S10.4.1, by = c("Date"), all = TRUE)
+Site10.5.1 <- Sum_x.5(S10.5)
+
+S10 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site10.1, Site10.2, Site10.3,Site10.4.2, Site10.4.3, Site10.4.5, Site10.5.1))
+D <- group_in_season(setDT(Site10.4.2),date_col = "Date")
+
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+
+write_xlsx(S10, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Northern Site 10.xlsx")
+  
+```
+
+
+### Site 11 Files (No x.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S11.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 11 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S11.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 11 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:64))  
+
+S11.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 11 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S11.4.1 <- P_Data %>% filter(Site == 11) %>%  select(-c("Site"))
+
+S11.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 2 (Jivan)/Diary and Results/Northern Site 2 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S11.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 2 (Jivan)/Diary and Results/Northern Site 2 Diary and Results.xlsx",sheet = "Biomass summary", skip = 0,col_names = T)
+
+Site11.1 <-   Sum_x.1(S11.1)
+Site11.3 <-   Sum_x.3(S11.3)
+Site11.4.1 <- Sum_x.4_S11(S11.4)
+Site11.4.2 <- Sum_x.4.1(Site11.4.1)
+Site11.4.3 <- Sum_x.4.2(Site11.4.1)
+Site11.4.4 <- Sum_x.4.3(Site11.4.1)
+Site11.4.5 <- merge(Site11.4.4,S11.4.1, by = c("Date"), all = TRUE)
+Site11.5.1 <- Sum_x.5(S11.5)
+Site11.6 <- Sum_x.6(S11.6)
+
+S11 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site11.1,Site11.3,Site11.4.2, Site11.4.3, Site11.4.5, Site11.5.1, Site11.6))
+D <- group_in_season(setDT(Site11.4.2),date_col = "Date")
+
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+write_xlsx(S11, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Northern Site 11.xlsx")
+  
+```
+
+### Site 12 Files (No x.2 as no logging gear at this site)
+```{r, echo=FALSE} 
+S12.1 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 12 SWB (V1).xlsx",sheet = "Climate file", skip = 3,col_names = T)
+
+S12.3 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 12 SWB (V1).xlsx",sheet = "soil water balance", skip = 23,col_names = paste0("col",1:64))  
+
+S12.4 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Soil Water Balance Files/Northern Site 12 SWB (V1).xlsx",sheet = "DFM data", skip = 5,col_names = T)
+
+S12.4.1 <- P_Data %>% filter(Site == 12) %>%  select(-c("Site"))
+
+S12.5 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 3 (Masters)/Diary and Results/Northern Site 3 Diary and Results.xlsx",sheet = "Soil Chemical", skip = 2,col_names = T)
+
+S12.6 <- read_excel("//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/Sites/Northern/Northern Site 3 (Masters)/Diary and Results/Northern Site 3 Diary and Results.xlsx",sheet = "Biomass Summary", skip = 0,col_names = T)
+
+Site12.1 <-   Sum_x.1(S12.1)
+Site12.3 <-   Sum_x.3(S12.3)
+Site12.4.1 <- Sum_x.4_S12(S12.4)
+Site12.4.2 <- Sum_x.4.1(Site12.4.1)
+Site12.4.3 <- Sum_x.4.2(Site12.4.1)
+Site12.4.4 <- Sum_x.4.3(Site12.4.1)
+Site12.4.5 <- merge(Site12.4.4,S12.4.1, by = c("Date"), all = TRUE)
+Site12.5.1 <- Sum_x.5(S12.5)
+Site12.6 <- Sum_x.6(S12.6)
+
+S12 <- Reduce(function(x, y) merge(x, y, all = TRUE), list(Site12.1,Site12.3,Site12.4.2, Site12.4.3, Site12.4.5, Site12.5.1, Site12.6))
+D <- group_in_season(setDT(Site12.4.2),date_col = "Date")
+
+D[, sum(`Collected drainage (mm)`), by = .(Year)]
+
+write_xlsx(S12, "//Hawdfs41/data/Common/EXPTS/Commercial/F A R/SFF Fluxmeter/Sites and Results/FIF Data Packages/FIF Data Packages/Excel Data Files/Northern Site 12.xlsx")
+  
+```
+
+
+
+
